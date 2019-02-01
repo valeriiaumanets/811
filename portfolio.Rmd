@@ -39,24 +39,24 @@ library(here)
 
 
 
-<!-- Replace the below with bit about you. -->
 ### Research Interests
-NN
+Political parties in non-democratic regimes, political economy of repressions.
+
+---
 ### Questions I hope to answer
-NN
+Yet to be defined.
+
 ---
 
 ### Methods
-NN
+Yet to be defined.
 
 ---
 
-### Relevent data
-
-NN
+### Relevant data
+Yet to be found. 
 
 ---
 
 ### Something cool
-
-NN
+Not available.
