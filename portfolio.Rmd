@@ -1,6 +1,6 @@
 ---
 title: "PS811 Portfolio"
-author: "Valeriia"
+author: "Valeriia Umanets"
 output:
   html_document: 
     toc: true ## table of contents
@@ -40,23 +40,21 @@ library(here)
 
 
 ### Research Interests
-Political parties in non-democratic regimes, political economy of repressions.
+I am interested in elections in non-democratic political regimes and political economy of repressions in Eastern Europe and Eurasia. 
 
 ---
 ### Questions I hope to answer
-Yet to be defined.
-
+What is the role of type of electoral system and form of governance is the success of hegemonic parties in electoral authoritarian regimes? When and what type of repressions do autocrats apply in such regimes? 
 ---
 
 ### Methods
-Yet to be defined.
+I am interested in learning for about longitudinal analysis and cluster analysis. In addition to that I am interested in learning about natural experiments and content analysis. 
 
 ---
 
 ### Relevant data
-Yet to be found. 
+- The Authoritarian Regimes Dataset (ARD) is a comprehensive dataset on authoritarian regimes in the world between 1972-2014. It distinguishes different forms of authoritarian regimes by their institutional setups. ([data](https://sites.google.com/site/authoritarianregimedataset/home)) 
+- The Database of Political Institutions (DPI) presents institutional and electoral results data such as measures of checks and balances, tenure and stability of the government, identification of party affiliation and ideology, and fragmentation of opposition and government parties in the legislature. ([data](https://publications.iadb.org/handle/11319/7408))
+- V-Dem database is data with over 350 indicators on democratic and authoritarian systems across the world from 1900 to the present ([data](https://www.v-dem.net))
 
----
 
-### Something cool
-Not available.
