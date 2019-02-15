@@ -57,6 +57,14 @@ I am interested in cluster analysis, content analysis, and longitudinal analysis
 - The Database of Political Institutions (DPI) presents institutional and electoral results data such as measures of checks and balances, tenure and stability of the government, identification of party affiliation and ideology, and fragmentation of opposition and government parties in the legislature. ([data](https://publications.iadb.org/handle/11319/7408))
 - V-Dem database is data with over 350 indicators on democratic and authoritarian systems across the world from 1900 to the present ([data](https://www.v-dem.net))
 
+<!-- 
+Valeriia,
+These datasets look like solid options. They all seem quite large, so your key task will be to select a few variables of interests. 
+Try writing a few lines of R code that loads these data from their URL and then uses the select() from dplyr to trim it down to the columns you want. Make sure to include any ID columns. 
+If the files are very large, you may want to make a short .R script that loads from the URL, selects the variables you want, and then saves your new, smaller data file in a folder called "data" (make sure to save this script in your 811 folder, commit it, and push it). This portfolio page can then load this smaller data file from that folder using here(data/YourNewDataFile).
+Best,
+Devin
+-->
 
 ```{r, include=FALSE}
 parties <- read.csv("umanetsdata.csv")
