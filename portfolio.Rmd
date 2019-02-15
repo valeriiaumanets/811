@@ -6,6 +6,42 @@ output:
     toc: true ## table of contents
     code_folding: hide
 ---
+```{r setup, include=FALSE}
+## Defaults for R chunks
+knitr::opts_chunk$set(echo = TRUE, ## echo = TRUE means code will show
+                      warning=FALSE, ## supress warnings and messages from R
+                      message=FALSE,
+                      fig.path='Figs/', ## where to save figures
+                      fig.height = 3, ## default figure size (can differ in each chunk)
+                      fig.width = 7)
+
+## Add any R packages you require. 
+## Here are some we will use in 811:
+requires <- c("tidyverse",
+              "magrittr",
+              "foreign",
+              "readstata13",
+              "here",
+              "gplots",
+              "ggpubr",
+              "dplyr",
+              "bindrcpp")
+
+## Install any you don't have
+to_install <- c(requires %in% rownames(installed.packages()) == FALSE)
+install.packages(c(requires[to_install], "NA"), repos = "https://cloud.r-project.org/" )
+
+
+## Load all required R packages
+library(ggplot2); theme_set(theme_minimal())
+library(magrittr)
+library(here)
+library(gplots)
+library(ggpubr)
+library(tidyverse)
+library(dplyr)
+library(bindrcpp)
+```
 
 <!-- The above header sets everything up. -->
 
@@ -41,13 +77,15 @@ Devin
 -->
 
 ```{r, include=FALSE}
-parties <- read.csv("umanetsdata.csv")
+parties <- read.csv("umanetsdata.csv", stringsAsFactors = F)
 ```
 
 #Figure 1: Descriptive statistics of three measurements of the ENP.
+
+#Histograms 
 ``` {r, echo=FALSE}
 
-##Histograms 
+
 
 par(mfrow=c(1,3))
 hist (parties$enp_lt, freq = FALSE, breaks = 20, col = "grey",
@@ -60,8 +98,10 @@ hist (parties$enp_gol, freq = FALSE, breaks = 20, col = "grey",
       xlab = "Golosov (2010)",
       main = "")
 mtext("Histograms for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+``` 
 
-##Scatter plots
+#Scatter plots
+```{r}
 par(mfrow = c(1,3))
 plot(parties$year, parties$enp_lt, pch = 16,
      xlab = "Year",
@@ -73,9 +113,10 @@ plot(parties$year, parties$enp_gol, pch = 16,
      xlab = "Year",
      ylab = "ENP by Golosov (2010)")
 mtext("Scatter plots for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+````
 
-##Box plots
-
+#Box plots
+```{r}
 par(mfrow=c(1,3))
 boxplot(parties$enp_lt, ylab = "ENP by Laakso and Taagepera (1979)")
 boxplot(parties$enp_mol, ylab = "ENP by Molinar (1991)")
@@ -107,3 +148,19 @@ plot(parties$enp_gol, parties$enp_mol, pch = 16,
      cex.main=1)
 ```
 
+#Figure 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
+```{r}
+parties %>% 
+  mutate(elecsys = ifelse(elecsys==1,'Proportional Representation',elecsys)) %>%
+    mutate(elecsys = ifelse(elecsys==0,'Mixed Electoral System',elecsys)) %>%
+  mutate(elecsys = ifelse(elecsys==2,'Plurality',elecsys)) %>%
+  filter(elecsys!=".") %>% 
+  ggplot() + 
+  aes(x = elecsys, y = enp_lt, colour=elecsys)+
+  geom_boxplot(colour="black")+
+  geom_jitter()+
+  scale_colour_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  labs(x= "", y = "ENP by Laasko and Taagapera", colour = "Electoral systems")+
+  theme(legend.position = "None")
+  
+```
