@@ -6,7 +6,7 @@ output:
     toc: true ## table of contents
     code_folding: hide
 ---
-```{r setup, include=FALSE}
+```{r, include=FALSE}
 ## Defaults for R chunks
 knitr::opts_chunk$set(echo = TRUE, ## echo = TRUE means code will show
                       warning=FALSE, ## supress warnings and messages from R
@@ -58,3 +58,69 @@ I am interested in cluster analysis, content analysis, and longitudinal analysis
 - V-Dem database is data with over 350 indicators on democratic and authoritarian systems across the world from 1900 to the present ([data](https://www.v-dem.net))
 
 
+```{r, include=FALSE}
+parties <- read.csv("umanetsdata.csv")
+```
+
+#Figure 1: Descriptive statistics of three measurements of the ENP.
+``` {r, echo=FALSE}
+
+##Histograms 
+
+par(mfrow=c(1,3))
+hist (parties$enp_lt, freq = FALSE, breaks = 20, col = "grey",
+      main = "",
+      xlab = "ENP by Laakso and Taagepera (1979)")
+hist (parties$enp_mol, freq = FALSE, breaks = 20, col = "grey",
+      xlab = "ENP by Molinar (1991)",
+      main = "")
+hist (parties$enp_gol, freq = FALSE, breaks = 20, col = "grey",
+      xlab = "Golosov (2010)",
+      main = "")
+mtext("Histograms for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+
+##Scatter plots
+par(mfrow = c(1,3))
+plot(parties$year, parties$enp_lt, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Laakso and Taagepera (1979)")
+plot(parties$year, parties$enp_mol, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Molinar (1991)")
+plot(parties$year, parties$enp_gol, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Golosov (2010)")
+mtext("Scatter plots for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+
+##Box plots
+
+par(mfrow=c(1,3))
+boxplot(parties$enp_lt, ylab = "ENP by Laakso and Taagepera (1979)")
+boxplot(parties$enp_mol, ylab = "ENP by Molinar (1991)")
+boxplot(parties$enp_mol, ylab = "ENP by Golosov (2010)")
+mtext("Box plots for Effective number of parties", side = 3, line = -2, outer = TRUE)
+```
+
+#Figure 2: Scatter plots of the ENPs (three indexes are plotted by each other).
+```{r, echo=FALSE}
+
+par(mfrow = c(1,3))
+plot(parties$enp_lt, parties$enp_mol, pch = 16, 
+     lines(lowess(parties$enp_lt, parties$enp_mol), col = "blue"),
+     xlab = "ENP by Laakso and Taagepera (1979)",
+     ylab = "ENP by Molinar (1991)",
+     main = "Laakso and Taagepera and Molinar",
+     cex.main=1)
+plot(parties$enp_lt, parties$enp_gol, pch = 16,
+     lines(lowess(parties$enp_lt, parties$enp_gol), col = "blue"),
+     xlab = "ENP by Laakso and Taagepera (1979)",
+     ylab = "ENP by Golosov (2010)",
+     main = "Laakso and Taagepera and Golosov",
+     cex.main=1)
+plot(parties$enp_gol, parties$enp_mol, pch = 16,
+     lines(lowess(parties$enp_gol, parties$enp_mol), col = "blue"),
+     xlab = "ENP by Golosov (2010)",
+     ylab = "ENP by Molinar (1991)",
+     main = "Golosov and Molinar",
+     cex.main=1)
+```
