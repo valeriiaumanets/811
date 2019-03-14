@@ -8,28 +8,21 @@ output:
 ---
 ```{r setup, include=FALSE}
 ## Defaults for R chunks
-knitr::opts_chunk$set(echo = TRUE, ## echo = TRUE means code will show
-                      warning=FALSE, ## supress warnings and messages from R
-                      message=FALSE,
-                      fig.path='Figs/', ## where to save figures
-                      fig.height = 3, ## default figure size (can differ in each chunk)
-                      fig.width = 7)
-
-## Add any R packages you require. 
-## Here are some we will use in 811:
+## Add any R packages 
 requires <- c("tidyverse",
               "magrittr",
               "foreign",
               "readstata13",
               "here",
-              "gplots",
+              "ggplot2",
               "ggpubr",
               "dplyr",
               "bindrcpp")
 
-## Install any you don't have
+## Install all other from CRAN
 to_install <- c(requires %in% rownames(installed.packages()) == FALSE)
 install.packages(c(requires[to_install], "NA"), repos = "https://cloud.r-project.org/" )
+
 
 
 ## Load all required R packages
@@ -50,15 +43,17 @@ library(bindrcpp)
 
 
 ### Research Interests
-I am interested in elections in non-democratic political regimes and political economy of repressions in Eastern Europe and Eurasia. 
+I am interested in elections, parties, and women’s representation and political participation in non-democratic political regimes.
 
 ---
+
 ### Questions I hope to answer
-What is the role of type of electoral system and form of governance is the success of hegemonic parties in electoral authoritarian regimes? When and what type of repressions do autocrats apply in such regimes? 
+What is the role of type of electoral system and form of governance is the success of hegemonic parties in electoral authoritarian regimes? Is women’s political participation related to the Number of Effective Parliamentary Parties? Are women more or less likely to succeed in regimes with a hegemonic party?
+
 ---
 
 ### Methods
-I am interested in cluster analysis, content analysis, and longitudinal analysis. 
+I am interested in various regression models, particularly in panel data, cluster analysis, technics applied in natural experiments, text analysis, and qualitative methods such as interviews and focus groups.
 
 ---
 
@@ -80,79 +75,73 @@ Devin
 parties <- read.csv("umanetsdata.csv", stringsAsFactors = F)
 ```
 
-#Figure 1: Descriptive statistics of three measurements of the ENP.
-
-#Histograms 
-``` {r, echo=FALSE}
+### Descriptive statistics of three measurements of the ENP.
 
 
+####Fig 1: Density Plots for Effective Number of Parties.
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
 
-par(mfrow=c(1,3))
-hist (parties$enp_lt, freq = FALSE, breaks = 20, col = "grey",
-      main = "",
-      xlab = "ENP by Laakso and Taagepera (1979)")
-hist (parties$enp_mol, freq = FALSE, breaks = 20, col = "grey",
-      xlab = "ENP by Molinar (1991)",
-      main = "")
-hist (parties$enp_gol, freq = FALSE, breaks = 20, col = "grey",
-      xlab = "Golosov (2010)",
-      main = "")
-mtext("Histograms for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
-``` 
+density1 <- parties %>% 
+	  ggplot() + 
+	  aes(x = enp_lt) +
+	  geom_density() + 
+	  labs(x = "ENP by Laakso and Taagepera (1979)")
+density2 <- parties %>% 
+	  ggplot() + 
+		aes(x = enp_mol) +
+	  geom_density() + 
+	  labs(x = "ENP by Molinar (1991)")
+density3 <- parties %>% 
+	  ggplot() + 
+	  aes(x = enp_gol) +
+	  geom_density() + 
+	  labs(x = "ENP by Golosov (2010)")
+grid.arrange(density1, density2, density3, ncol=3,
+             top = (""))
 
-#Scatter plots
-```{r}
-par(mfrow = c(1,3))
-plot(parties$year, parties$enp_lt, pch = 16,
-     xlab = "Year",
-     ylab = "ENP by Laakso and Taagepera (1979)")
-plot(parties$year, parties$enp_mol, pch = 16,
-     xlab = "Year",
-     ylab = "ENP by Molinar (1991)")
-plot(parties$year, parties$enp_gol, pch = 16,
-     xlab = "Year",
-     ylab = "ENP by Golosov (2010)")
-mtext("Scatter plots for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
-````
-
-#Box plots
-```{r}
-par(mfrow=c(1,3))
-boxplot(parties$enp_lt, ylab = "ENP by Laakso and Taagepera (1979)")
-boxplot(parties$enp_mol, ylab = "ENP by Molinar (1991)")
-boxplot(parties$enp_mol, ylab = "ENP by Golosov (2010)")
-mtext("Box plots for Effective number of parties", side = 3, line = -2, outer = TRUE)
 ```
 
-#Figure 2: Scatter plots of the ENPs (three indexes are plotted by each other).
+
+####Fig 2:Scatter Plots for Effective Number of Parties.
 ```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
 
-par(mfrow = c(1,3))
-plot(parties$enp_lt, parties$enp_mol, pch = 16, 
-     lines(lowess(parties$enp_lt, parties$enp_mol), col = "blue"),
-     xlab = "ENP by Laakso and Taagepera (1979)",
-     ylab = "ENP by Molinar (1991)",
-     main = "Laakso and Taagepera and Molinar",
-     cex.main=1)
-plot(parties$enp_lt, parties$enp_gol, pch = 16,
-     lines(lowess(parties$enp_lt, parties$enp_gol), col = "blue"),
-     xlab = "ENP by Laakso and Taagepera (1979)",
-     ylab = "ENP by Golosov (2010)",
-     main = "Laakso and Taagepera and Golosov",
-     cex.main=1)
-plot(parties$enp_gol, parties$enp_mol, pch = 16,
-     lines(lowess(parties$enp_gol, parties$enp_mol), col = "blue"),
-     xlab = "ENP by Golosov (2010)",
-     ylab = "ENP by Molinar (1991)",
-     main = "Golosov and Molinar",
-     cex.main=1)
+scatter1 <- parties %>% 
+  ggplot() + 
+  aes(x = year, y = enp_lt) + 
+  geom_point(alpha = .2) +
+  labs(x = "Year", y = "ENP by Laakso and Taagepera (1979)")
+scatter2 <- parties %>% 
+  ggplot() + 
+  aes(x = year, y = enp_mol) + 
+  geom_point(alpha = .2) +
+  labs(x = "Year", y = "ENP by Molinar (1991)")
+scatter3 <-  parties %>% 
+  ggplot() + 
+  aes(x = year, y = enp_gol) + 
+  geom_point(alpha = .2) +
+  labs(x = "Year", y = "ENP by Golosov (2010)")
+grid.arrange(scatter1, scatter2, scatter3, ncol=3,
+             top = (""))
+
 ```
 
-#Figure 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
+
+
+
+####Fig 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
 ```{r}
-parties %>% 
+library(dplyr)
+library(ggplot2)
+
+parties %>%
   mutate(elecsys = ifelse(elecsys==1,'Proportional Representation',elecsys)) %>%
-    mutate(elecsys = ifelse(elecsys==0,'Mixed Electoral System',elecsys)) %>%
+  mutate(elecsys = ifelse(elecsys==0,'Mixed Electoral System',elecsys)) %>%
   mutate(elecsys = ifelse(elecsys==2,'Plurality',elecsys)) %>%
   filter(elecsys!=".") %>% 
   ggplot() + 
@@ -161,6 +150,8 @@ parties %>%
   geom_jitter()+
   scale_colour_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
   labs(x= "", y = "ENP by Laasko and Taagapera", colour = "Electoral systems")+
+  ggtitle("") 
   theme(legend.position = "None")
   
 ```
+
