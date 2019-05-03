@@ -116,8 +116,8 @@ The core historical predictor is the democratic stock variable, which I calculat
 
 The figure below shows the predicted probabilities for the number of effective political parties in a linear model (for all three ENPs). This model controls for the electoral institutions (the type of electoral system and the form of governance), level of economic development (Logged PPP GDP), and natural resource rents (logged). It also controls for electoral cycle and country ids. Other variables are held at their sample means and democratic stock is varied across its range. \newline
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-stargazer(dataFE, header=FALSE, type="html", title="Regression Table")
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+stargazer(dataFE, header=FALSE, type="text", title="Regression Table")
 ```
 
 ######Fig 1:  Predicted probabilities for the number of effective political parties over Democratic stock.
