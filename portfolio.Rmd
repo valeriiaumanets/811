@@ -26,12 +26,14 @@ requires <- c("tidyverse",
               "ggplot2",
               "ggpubr",
               "dplyr",
-              "bindrcpp")
+              "bindrcpp",
+              "plm",
+              "stargazer",
+              "clubSandwich")
 
 ## Install all other from CRAN
 to_install <- c(requires %in% rownames(installed.packages()) == FALSE)
 install.packages(c(requires[to_install], "NA"), repos = "https://cloud.r-project.org/" )
-
 
 
 ## Load all required R packages
@@ -43,6 +45,9 @@ library(ggpubr)
 library(tidyverse)
 library(dplyr)
 library(bindrcpp)
+library(clubSandwich)
+library(stargazer)
+library(plm)
 
 options(stringsAsFactors = F) # set this as the default
 ```
@@ -84,9 +89,13 @@ Devin
 
 ```{r data, include=FALSE}
 # please keep all data in a data subfolder
-parties <- read.csv("data/umanetsdata.csv", stringsAsFactors = F)
+parties <- read.csv("data/umanetsdata.csv", stringsAsFactors = F, header=T)
 
 d <- parties # shorter name = easier
+
+as.numeric(d$rgdpe)
+as.numeric(d$rent)
+dataFE <- lm(enp_lt  ~ elecsys + formgov + rgdpe + rent + demstock, data = d)
 
 # here is another way of organizing the data. Instead of just by country, splitting it out by source. How you structure these data depend on what you want to do with them, but your current figures compare sources, so it is helpful to have a source variable.
 d %<>% 
@@ -104,7 +113,6 @@ d$ENPsource %<>% str_replace("enp_gol", "ENP by Golosov (2010)")
 
 glimpse(d)
 ```
-
 
 ### Descriptive statistics of three measurements of the ENP.
 
@@ -271,3 +279,9 @@ mtext("Box plots for Effective number of parties", side = 3, line = -2, outer = 
 
 
 
+```{r,message=FALSE, warning=FALSE}
+
+summary(dataFE)
+stargazer(dataFE, title="Results", header=FALSE, type="html")
+
+```
