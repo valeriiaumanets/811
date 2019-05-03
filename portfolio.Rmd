@@ -29,7 +29,8 @@ requires <- c("tidyverse",
               "bindrcpp",
               "plm",
               "stargazer",
-              "clubSandwich")
+              "clubSandwich",
+              "xtable")
 
 ## Install all other from CRAN
 to_install <- c(requires %in% rownames(installed.packages()) == FALSE)
@@ -48,6 +49,7 @@ library(bindrcpp)
 library(clubSandwich)
 library(stargazer)
 library(plm)
+library(xtable)
 
 options(stringsAsFactors = F) # set this as the default
 ```
@@ -87,15 +89,66 @@ Best,
 Devin
 -->
 
-```{r data, include=FALSE}
-# please keep all data in a data subfolder
+
+```{r, include=FALSE}
 parties <- read.csv("data/umanetsdata.csv", stringsAsFactors = F, header=T)
 
 d <- parties # shorter name = easier
 
 as.numeric(d$rgdpe)
 as.numeric(d$rent)
-dataFE <- lm(enp_lt  ~ elecsys + formgov + rgdpe + rent + demstock + id + elections, data = d)
+dataFE <- lm(enp_lt  ~ elecsys + formgov + log(rgdpe) + log(rent) + demstock + id + elections, data = d)
+summary(dataFE)
+
+predicted <- predict(dataFE)
+```
+###Ongoing Project
+
+####Puzzle
+Why do some states have dominant parties which occupy the electoral field, while others have a significant number of effective political parties? The purpose of this paper is an attempt to explain what causes variation in the effective number of political parties in non-democratic regimes that hold elections. \newline
+
+####Data
+The sample of electoral authoritarian sates for this paper includes 712 observations for 46 countries with at least three electoral cycles from 1975 to 2010 and is based on the category called 'limited multiparty regimes' from the Authoritarian Regimes Dataset (ARD). To calculate the Laakso and Taagepera, Molinar and Golosov indexes, I used the Database of Political Institutions (DPI) 2015. As many countries have minor variations in the number of the effective number of political parties between, I retain the 'between period' in the data. This variation could be understood as the result of the by-elections that were quite common among the countries in the sample. In order to measure the type of electoral system I have created a categorical variable using data from the DPI denoting the type of electoral system as plurality (first-past-the-post) (2), proportional representation (1), and mixed electoral systems to serve as the reference category (0). \newline \newline 
+
+####Democratic stock
+I assume that historical background, and accumulated political capital in particular, can have a strong impact on the number and size of parties _measured as the effective number of parties (ENP)_. Based on Gerring et al.’s argument (2005), I hypothesise that any previous democratic experience of the state would contribute positively to the number of political parties, as any democratic background indicates the institutionalization of collective action, which results in the political capital that would make the construction of one strong party too costly.
+The core historical predictor is the democratic stock variable, which I calculated based on the coefficient for democratic stock suggested by Gerring, et al. (2005, p. 348). This predictor is meant to capture the countries’ political capital stock that prevents the emergence of one dominant party and stimulates the growth of the number of political parties. The formula for democracy stock is based on a 1 percent annual depreciation rate for 46 countries from the end of World War II to 2010 (the final year of my data set). Like Gerring, et al., I use the variable Polity2 from the Polity IV data set to measure the level of democracy across time to estimate the extent to which democratic patterns are institutionalised. \newline
+
+The figure below shows the predicted probabilities for the number of effective political parties in a linear model (for all three ENPs). This model controls for the electoral institutions (the type of electoral system and the form of governance), level of economic development (Logged PPP GDP), and natural resource rents (logged). It also controls for electoral cycle and country ids. Other variables are held at their sample means and democratic stock is varied across its range. \newline
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stargazer(dataFE, header=FALSE, type="latex", title="Regression Table")
+```
+
+######Fig 1:  Predicted probabilities for the number of effective political parties over Democratic stock.
+```{r, echo = T}
+d %>% 
+  ggplot() + 
+  aes(x = predicted, y = demstock) + 
+  geom_point(alpha = .2) +
+  geom_smooth(method = "lm") + 
+  labs(x = "Predicted Values for Effective Number of Parties", y = "Democratic Stock")
+
+```
+
+###The effective number of parties (ENP)
+I assume that the most precise way to identify the real weighted size and number of political parties in non-democratic regimes is by applying the index of the effective number of parties (ENP) (Laakso and Taagepera 1979). The formula by Laakso and Taagepera provides an adjusted number of political parties in a country’s party system. The purpose of this index is to count parties and then weight the count by their relative strength. The relative strength is based on parties’ vote shares (‘effective number of electoral parties’) or seat shares in the parliament (‘effective number of parliamentary parties’). In this project, I use the latter measure (ENPP).
+ As this analysis is interested in whether the number and size of the parties is different across different forms of electoral systems, I use the effective number of parties (ENP) to conceptualise my dependent variable. This concept was first introduced by Laakso and Taagepera (1979) and was modified by several scholars including Molinar (1991) and Golosov (2010). The purpose of this index is to count parties and then weight the count by their relative strength. In this paper, I use the measure called the effective number of parliamentary parties (ENPP). The effective number of parliamentary parties by all three indexes is defined in Formulas 1, 2, 3 where $p_i$ is the fractional share of the i-the component, $N_{LT}$, $N_{Molinar}$, and $N_{Golosov}$ is the effective number of parties by index, and $p_i^2$ is the square of each party's proportion of all seats.\newline 
+
+
+$$N_{LT}=\frac{1}{\sum_{i=1}^n p_i^2} (1)$$ \newline 
+
+
+
+$$N_{Molinar}=1+N_{LT}\frac{(\sum_{i=1}^n p_i^2)-p_i^2}{\sum_{i=1}^n p_i^2} (2)$$ 
+
+
+$$N_{Golosov}=\sum_{i=1}^n\frac{p_i}{p_i+p_1^2-p_i^2} (3)$$ \newline 
+
+
+
+```{r data, include=FALSE}
+
 
 # here is another way of organizing the data. Instead of just by country, splitting it out by source. How you structure these data depend on what you want to do with them, but your current figures compare sources, so it is helpful to have a source variable.
 d %<>% 
@@ -114,10 +167,30 @@ d$ENPsource %<>% str_replace("enp_gol", "ENP by Golosov (2010)")
 glimpse(d)
 ```
 
-### Descriptive statistics of three measurements of the ENP.
+```{r, echo = T, results = 'hide'}
+
+```
 
 
-####Fig 1:  Density Plots for Effective Number of Parties.
+
+####Descriptive statistics of three measurements of the ENP. Exploring ENPs Independently.\newline \newline 
+
+
+######Fig 2: Simple histograms for Effective Number of Parties.\newline 
+```{r histogram}
+# Here is histograms with regular ggplot
+d %>% 
+  ggplot() + 
+  aes(x = ENP) + 
+  geom_histogram() + 
+  facet_wrap("ENPsource") + 
+  labs(x = "Effective Number of Parties",
+       y = "Number of Countries")
+
+```
+
+
+######Fig 3:  Density Plots for Effective Number of Parties.\newline 
 ```{r, echo= TRUE, message=FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
@@ -143,7 +216,7 @@ grid.arrange(density1, density2, density3, ncol=3,
 ```
 
 
-####Fig 2: Scatter Plots for Effective Number of Parties.
+######Fig 4: Scatter Plots for Effective Number of Parties. \newline 
 ```{r, echo= TRUE}
 library(dplyr)
 library(ggplot2)
@@ -169,8 +242,38 @@ grid.arrange(scatter1, scatter2, scatter3, ncol=3,
 
 ```
 
+####Adding the colour  \newline \newline 
 
-####Fig 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
+######Fig 5: Overlapping scatter plots for all three ENP indexes. \newline 
+```{r scatter}
+# Here is scatter plot with regular ggplot
+d %>% 
+  ggplot() + 
+  aes(x = year, y = ENP, color = ENPsource) + 
+  geom_point(alpha = .2) +
+  geom_smooth(method = "lm") + 
+  labs(x = "Effective Number of Parties")
+```
+
+######Fig 6: Comparing the patterns among the ENP indexes. \newline 
+```{r average-enp}
+# Here is scatter plot with regular ggplot
+d %>% 
+  group_by(year, ENPsource) %>% # by piping in d, rather than using ggplot(d), we can modify the data before plotting without creating a new object. Here, we get the mean ENP: 
+  summarise(Mean = mean(ENP)) %>% 
+  ggplot() + 
+  aes(x = year, y = Mean, color = ENPsource) +
+  geom_line() +
+  labs(x = "Effective Number of Parties")
+```
+
+
+### Types of Electoral Systems and Effective Number of Parties\newline
+
+In democratic states, the choice of electoral system leads to striking consequences for power distribution. The most well-known example is Duverger’s Law (1954), which states that plurality rules are associated with two‐party systems in Western democracies, whereas proportional representation (PR) is associated with multiparty systems. Lijphart and Humphreys (1999) found that electoral systems can affect accountability, women’s and minorities’ representation, citizen satisfaction, and turnout. Ezrow (2010) found that PR systems are more prevalent in developed democracies due to the greater appeal of their ‘representativeness,’ compared to plurality systems. This is why it is interesting to look closer at the variation between states based on their party systems. \newline
+
+
+######Fig 7: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. \newline 
 ```{r, echo= TRUE, message=FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
@@ -192,96 +295,8 @@ parties %>%
 ```
 
 
-###Other Plots
 
 
 
-``` {r, echo = T, results = 'hide'}
-par(mfrow=c(1,3))
-hist (parties$enp_lt, freq = FALSE, breaks = 20, col = "grey",
-      main = "",
-      xlab = "ENP by Laakso and Taagepera (1979)")
-hist (parties$enp_mol, freq = FALSE, breaks = 20, col = "grey",
-      xlab = "ENP by Molinar (1991)",
-      main = "")
-hist (parties$enp_gol, freq = FALSE, breaks = 20, col = "grey",
-      xlab = "Golosov (2010)",
-      main = "")
-mtext("Histograms for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
-``` 
-
-```{r density}
-# Here is density with regular ggplot
-d %>% 
-  ggplot() + 
-  aes(x = ENP) + 
-  geom_density() + 
-  facet_wrap("ENPsource") + # facet_grid and facet_wrap allow you to break out your data by groups in one plot
-  labs(x = "Effective Number of Parties")
-```
-
-```{r histogram}
-# Here is histograms with regular ggplot
-d %>% 
-  ggplot() + 
-  aes(x = ENP) + 
-  geom_histogram() + 
-  facet_wrap("ENPsource") + 
-  labs(x = "Effective Number of Parties",
-       y = "Number of Countries")
-
-```
 
 
-```{r, echo = T, results = 'hide'}
-par(mfrow = c(1,3))
-plot(parties$year, parties$enp_lt, pch = 16,
-     xlab = "Year",
-     ylab = "ENP by Laakso and Taagepera (1979)")
-plot(parties$year, parties$enp_mol, pch = 16,
-     xlab = "Year",
-     ylab = "ENP by Molinar (1991)")
-plot(parties$year, parties$enp_gol, pch = 16,
-     xlab = "Year",
-     ylab = "ENP by Golosov (2010)")
-mtext("Scatter plots for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
-```
-
-```{r scatter}
-# Here is scatter plot with regular ggplot
-d %>% 
-  ggplot() + 
-  aes(x = year, y = ENP, color = ENPsource) + 
-  geom_point(alpha = .2) +
-  geom_smooth(method = "lm") + 
-  labs(x = "Effective Number of Parties")
-```
-
-```{r average-enp}
-# Here is scatter plot with regular ggplot
-d %>% 
-  group_by(year, ENPsource) %>% # by piping in d, rather than using ggplot(d), we can modify the data before plotting without creating a new object. Here, we get the mean ENP: 
-  summarise(Mean = mean(ENP)) %>% 
-  ggplot() + 
-  aes(x = year, y = Mean, color = ENPsource) +
-  geom_line() +
-  labs(x = "Effective Number of Parties")
-```
-
-
-```{r, echo = T, results = 'hide'}
-par(mfrow=c(1,3))
-boxplot(parties$enp_lt, ylab = "ENP by Laakso and Taagepera (1979)")
-boxplot(parties$enp_mol, ylab = "ENP by Molinar (1991)")
-boxplot(parties$enp_mol, ylab = "ENP by Golosov (2010)")
-mtext("Box plots for Effective number of parties", side = 3, line = -2, outer = TRUE)
-```
-
-
-
-```{r,message=FALSE, warning=FALSE}
-
-summary(dataFE)
-stargazer(dataFE, title="Results", header=FALSE, type="text")
-
-```
