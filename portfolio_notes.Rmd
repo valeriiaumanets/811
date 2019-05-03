@@ -1,0 +1,221 @@
+---
+title: "PS811 Portfolio"
+author: "Valeriia Umanets"
+output:
+  html_document: 
+    toc: true ## table of contents
+    code_folding: hide
+---
+```{r setup, include=FALSE}
+## Defaults for R chunks
+## Add any R packages 
+requires <- c("tidyverse",
+              "magrittr",
+              "foreign",
+              "readstata13",
+              "here",
+              "ggplot2",
+              "ggpubr",
+              "dplyr",
+              "bindrcpp")
+
+## Install all other from CRAN
+to_install <- c(requires %in% rownames(installed.packages()) == FALSE)
+install.packages(c(requires[to_install], "NA"), repos = "https://cloud.r-project.org/" )
+
+
+
+## Load all required R packages
+library(ggplot2); theme_set(theme_minimal())
+library(magrittr)
+library(here)
+library(gplots)
+library(ggpubr)
+library(tidyverse)
+library(dplyr)
+library(bindrcpp)
+```
+
+<!-- The above header sets everything up. -->
+
+
+
+
+
+### Research Interests
+I am interested in elections, parties, and women’s representation and political participation in non-democratic political regimes.
+
+---
+
+### Questions I hope to answer
+What is the role of type of electoral system and form of governance is the success of hegemonic parties in electoral authoritarian regimes? Is women’s political participation related to the Number of Effective Parliamentary Parties? Are women more or less likely to succeed in regimes with a hegemonic party?
+
+---
+
+### Methods
+I am interested in various regression models, particularly in panel data, cluster analysis, technics applied in natural experiments, text analysis, and qualitative methods such as interviews and focus groups.
+
+---
+
+### Relevant data
+- The Authoritarian Regimes Dataset (ARD) is a comprehensive dataset on authoritarian regimes in the world between 1972-2014. It distinguishes different forms of authoritarian regimes by their institutional setups. ([data](https://sites.google.com/site/authoritarianregimedataset/home)) 
+- The Database of Political Institutions (DPI) presents institutional and electoral results data such as measures of checks and balances, tenure and stability of the government, identification of party affiliation and ideology, and fragmentation of opposition and government parties in the legislature. ([data](https://publications.iadb.org/handle/11319/7408))
+- V-Dem database is data with over 350 indicators on democratic and authoritarian systems across the world from 1900 to the present ([data](https://www.v-dem.net))
+
+<!-- 
+Valeriia,
+These datasets look like solid options. They all seem quite large, so your key task will be to select a few variables of interests. 
+Try writing a few lines of R code that loads these data from their URL and then uses the select() from dplyr to trim it down to the columns you want. Make sure to include any ID columns. 
+If the files are very large, you may want to make a short .R script that loads from the URL, selects the variables you want, and then saves your new, smaller data file in a folder called "data" (make sure to save this script in your 811 folder, commit it, and push it). This portfolio page can then load this smaller data file from that folder using here(data/YourNewDataFile).
+Best,
+Devin
+-->
+
+```{r, include=FALSE}
+parties <- read.csv("umanetsdata.csv", stringsAsFactors = F)
+```
+
+###Figure 1: Descriptive statistics of three measurements of the ENP.
+
+``` {r, echo=FALSE}
+
+par(mfrow=c(1,3))
+hist (parties$enp_lt, freq = FALSE, breaks = 20, col = "grey",
+      main = "",
+      xlab = "ENP by Laakso and Taagepera (1979)")
+hist (parties$enp_mol, freq = FALSE, breaks = 20, col = "grey",
+      xlab = "ENP by Molinar (1991)",
+      main = "")
+hist (parties$enp_gol, freq = FALSE, breaks = 20, col = "grey",
+      xlab = "Golosov (2010)",
+      main = "")
+mtext("Histograms for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+
+
+``` 
+
+```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
+
+density1 <- parties %>% 
+	  ggplot() + 
+	  aes(x = enp_lt) +
+	  geom_density() + 
+	  labs(x = "ENP by Laakso and Taagepera (1979)")
+density2 <- parties %>% 
+	  ggplot() + 
+		aes(x = enp_mol) +
+	  geom_density() + 
+	  labs(x = "ENP by Molinar (1991)")
+density3 <- parties %>% 
+	  ggplot() + 
+	  aes(x = enp_gol) +
+	  geom_density() + 
+	  labs(x = "ENP by Golosov (2010)")
+grid.arrange(density1, density2, density3, ncol=3,
+             top = ("Density Plots for Effective Number of Parties"))
+
+```
+
+#Scatter plots
+```{r}
+par(mfrow = c(1,3))
+plot(parties$year, parties$enp_lt, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Laakso and Taagepera (1979)")
+plot(parties$year, parties$enp_mol, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Molinar (1991)")
+plot(parties$year, parties$enp_gol, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Golosov (2010)")
+mtext("Scatter plots for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+```
+
+```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
+
+scatter1 <- parties %>% 
+  ggplot() + 
+  aes(x = year, y = enp_lt) + 
+  geom_point(alpha = .2) +
+  labs(x = "Year", y = "ENP by Laakso and Taagepera (1979)")
+scatter2 <- parties %>% 
+  ggplot() + 
+  aes(x = year, y = enp_mol) + 
+  geom_point(alpha = .2) +
+  labs(x = "Year", y = "ENP by Molinar (1991)")
+scatter3 <-  parties %>% 
+  ggplot() + 
+  aes(x = year, y = enp_gol) + 
+  geom_point(alpha = .2) +
+  labs(x = "Year", y = "ENP by Golosov (2010)")
+grid.arrange(scatter1, scatter2, scatter3, ncol=3,
+             top = ("Scatter Plots for Effective Number of Parties"))
+
+```
+
+#Box plots
+```{r}
+par(mfrow=c(1,3))
+boxplot(parties$enp_lt, ylab = "ENP by Laakso and Taagepera (1979)")
+boxplot(parties$enp_mol, ylab = "ENP by Molinar (1991)")
+boxplot(parties$enp_mol, ylab = "ENP by Golosov (2010)")
+mtext("Box plots for Effective number of parties", side = 3, line = -2, outer = TRUE)
+```
+
+#Figure 2: Scatter plots of the ENPs (three indexes are plotted by each other).
+```{r, echo=FALSE}
+
+par(mfrow = c(1,3))
+plot(parties$enp_lt, parties$enp_mol, pch = 16, 
+     lines(lowess(parties$enp_lt, parties$enp_mol), col = "blue"),
+     xlab = "ENP by Laakso and Taagepera (1979)",
+     ylab = "ENP by Molinar (1991)",
+     main = "Laakso and Taagepera and Molinar",
+     cex.main=1)
+plot(parties$enp_lt, parties$enp_gol, pch = 16,
+     lines(lowess(parties$enp_lt, parties$enp_gol), col = "blue"),
+     xlab = "ENP by Laakso and Taagepera (1979)",
+     ylab = "ENP by Golosov (2010)",
+     main = "Laakso and Taagepera and Golosov",
+     cex.main=1)
+plot(parties$enp_gol, parties$enp_mol, pch = 16,
+     lines(lowess(parties$enp_gol, parties$enp_mol), col = "blue"),
+     xlab = "ENP by Golosov (2010)",
+     ylab = "ENP by Molinar (1991)",
+     main = "Golosov and Molinar",
+     cex.main=1)
+```
+
+#Figure 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
+```{r}
+library(dplyr)
+library(ggplot2)
+
+parties %>%
+  mutate(elecsys = ifelse(elecsys==1,'Proportional Representation',elecsys)) %>%
+  mutate(elecsys = ifelse(elecsys==0,'Mixed Electoral System',elecsys)) %>%
+  mutate(elecsys = ifelse(elecsys==2,'Plurality',elecsys)) %>%
+  filter(elecsys!=".") %>% 
+  ggplot() + 
+  aes(x = elecsys, y = enp_lt, colour=elecsys)+
+  geom_boxplot(colour="black")+
+  geom_jitter()+
+  scale_colour_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  labs(x= "", y = "ENP by Laasko and Taagapera", colour = "Electoral systems")+
+  theme(legend.position = "None")
+  
+```
+
+#Figure 4: Democratic stock
+```{r}
+
+ggplot(parties)+
+aes(x = enp_lt, y = demstock)+
+geom_point() 
+```
