@@ -241,6 +241,10 @@ grid.arrange(scatter1, scatter2, scatter3, ncol=3,
              top = (""))
 
 ```
+\newline
+
+The descriptive statistics shows that none of the indexes demonstrate identical estimation of the ENP. All histograms demonstrate that each ENP index shows positive skewness, as there is more data on the left side of the curve, indicating that multi party authoritarian regimes are in general prone to have less parties. All three scatter plots demonstrate unequal variability (scatter) across the years, which potentially indicates the presence of heteroscedasticity. Finally, these graphs show that the different ENP indexes produce different numbers of effective political parties, despite being based on the same data. \newline
+
 
 ####Adding the colour  \newline \newline 
 
@@ -295,7 +299,7 @@ parties %>%
 ```
 
 
-
+Box plots based on the ENP by Laakso and Taagepera show again that the distribution is right-skewed, and there is an insignificant number of outliers. The box plot for Plurality shows a slightly lower median ENP. Scatter plots demonstrate some outliers for all types of electoral systems.
 
 
 
