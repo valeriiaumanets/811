@@ -161,6 +161,7 @@ grid.arrange(scatter1, scatter2, scatter3, ncol=3,
 
 ```
 
+
 ####Fig 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
 ```{r, echo= TRUE, message=FALSE, warning=FALSE}
 library(dplyr)
