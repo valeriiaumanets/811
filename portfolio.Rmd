@@ -95,7 +95,7 @@ d <- parties # shorter name = easier
 
 as.numeric(d$rgdpe)
 as.numeric(d$rent)
-dataFE <- lm(enp_lt  ~ elecsys + formgov + rgdpe + rent + demstock, data = d)
+dataFE <- lm(enp_lt  ~ elecsys + formgov + rgdpe + rent + demstock + id + elections, data = d)
 
 # here is another way of organizing the data. Instead of just by country, splitting it out by source. How you structure these data depend on what you want to do with them, but your current figures compare sources, so it is helpful to have a source variable.
 d %<>% 
@@ -282,6 +282,6 @@ mtext("Box plots for Effective number of parties", side = 3, line = -2, outer = 
 ```{r,message=FALSE, warning=FALSE}
 
 summary(dataFE)
-stargazer(dataFE, title="Results", header=FALSE, type="html")
+stargazer(dataFE, title="Results", header=FALSE, type="text")
 
 ```
