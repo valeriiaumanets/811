@@ -84,7 +84,7 @@ Devin
 
 ```{r data, include=FALSE}
 # please keep all data in a data subfolder
-parties <- read.csv("umanetsdata.csv", stringsAsFactors = F)
+parties <- read.csv("data/umanetsdata.csv", stringsAsFactors = F)
 
 d <- parties # shorter name = easier
 
@@ -160,7 +160,6 @@ grid.arrange(scatter1, scatter2, scatter3, ncol=3,
              top = (""))
 
 ```
-
 
 ####Fig 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
 ```{r, echo= TRUE, message=FALSE, warning=FALSE}
