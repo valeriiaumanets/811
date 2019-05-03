@@ -9,6 +9,15 @@ output:
 ```{r setup, include=FALSE}
 ## Defaults for R chunks
 ## Add any R packages 
+
+knitr::opts_chunk$set(echo = FALSE, ## echo = TRUE means code will show
+                      warning=FALSE, ## supress warnings and messages from R
+                      message=FALSE,
+                      fig.path='Figs/', ## where to save figures
+                      fig.height = 3, ## default figure size (can differ in each chunk)
+                      fig.width = 7)
+
+## Rrequired packages. 
 requires <- c("tidyverse",
               "magrittr",
               "foreign",
@@ -34,6 +43,8 @@ library(ggpubr)
 library(tidyverse)
 library(dplyr)
 library(bindrcpp)
+
+options(stringsAsFactors = F) # set this as the default
 ```
 
 <!-- The above header sets everything up. -->
@@ -71,15 +82,35 @@ Best,
 Devin
 -->
 
-```{r, include=FALSE}
+```{r data, include=FALSE}
+# please keep all data in a data subfolder
 parties <- read.csv("umanetsdata.csv", stringsAsFactors = F)
+
+d <- parties # shorter name = easier
+
+# here is another way of organizing the data. Instead of just by country, splitting it out by source. How you structure these data depend on what you want to do with them, but your current figures compare sources, so it is helpful to have a source variable.
+d %<>% 
+  gather(enp_lt, enp_mol, enp_gol, # gather these variables into new name-value pairs
+         key = "ENPsource", # the names/source of the enp scores
+         value = "ENP") # the enp scores (values)
+
+d$ENP %<>% as.numeric() # you now have one numeric vector with all the ENP scores 
+
+## Adding this information to the data will mean you don't need to keep typing it. Also, makes it more clear for anyone looking at your data
+d$ENPsource %<>% str_replace("enp_lt", "ENP by Laakso and Taagepera (1979)")
+d$ENPsource %<>% str_replace("enp_mol", "ENP by Molinar (1991)")
+d$ENPsource %<>% str_replace("enp_gol", "ENP by Golosov (2010)")
+
+
+glimpse(d)
 ```
+
 
 ### Descriptive statistics of three measurements of the ENP.
 
 
-####Fig 1: Density Plots for Effective Number of Parties.
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+####Fig 1:  Density Plots for Effective Number of Parties.
+```{r, echo= TRUE, message=FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
 require(gridExtra)
@@ -101,12 +132,11 @@ density3 <- parties %>%
 	  labs(x = "ENP by Golosov (2010)")
 grid.arrange(density1, density2, density3, ncol=3,
              top = (""))
-
 ```
 
 
-####Fig 2:Scatter Plots for Effective Number of Parties.
-```{r, echo=FALSE}
+####Fig 2: Scatter Plots for Effective Number of Parties.
+```{r, echo= TRUE}
 library(dplyr)
 library(ggplot2)
 require(gridExtra)
@@ -132,10 +162,8 @@ grid.arrange(scatter1, scatter2, scatter3, ncol=3,
 ```
 
 
-
-
 ####Fig 3: Scatter plot and boxplots of ENP by Laakso and Taagepera by type of electoral system. 
-```{r}
+```{r, echo= TRUE, message=FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
 
@@ -147,11 +175,99 @@ parties %>%
   ggplot() + 
   aes(x = elecsys, y = enp_lt, colour=elecsys)+
   geom_boxplot(colour="black")+
-  geom_jitter()+
+  geom_jitter(height = 0, alpha = .5)+
   scale_colour_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
   labs(x= "", y = "ENP by Laasko and Taagapera", colour = "Electoral systems")+
   ggtitle("") 
-  theme(legend.position = "None")
+
   
 ```
+
+
+###Other Plots
+
+
+
+``` {r, echo = T, results = 'hide'}
+par(mfrow=c(1,3))
+hist (parties$enp_lt, freq = FALSE, breaks = 20, col = "grey",
+      main = "",
+      xlab = "ENP by Laakso and Taagepera (1979)")
+hist (parties$enp_mol, freq = FALSE, breaks = 20, col = "grey",
+      xlab = "ENP by Molinar (1991)",
+      main = "")
+hist (parties$enp_gol, freq = FALSE, breaks = 20, col = "grey",
+      xlab = "Golosov (2010)",
+      main = "")
+mtext("Histograms for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+``` 
+
+```{r density}
+# Here is density with regular ggplot
+d %>% 
+  ggplot() + 
+  aes(x = ENP) + 
+  geom_density() + 
+  facet_wrap("ENPsource") + # facet_grid and facet_wrap allow you to break out your data by groups in one plot
+  labs(x = "Effective Number of Parties")
+```
+
+```{r histogram}
+# Here is histograms with regular ggplot
+d %>% 
+  ggplot() + 
+  aes(x = ENP) + 
+  geom_histogram() + 
+  facet_wrap("ENPsource") + 
+  labs(x = "Effective Number of Parties",
+       y = "Number of Countries")
+
+```
+
+
+```{r, echo = T, results = 'hide'}
+par(mfrow = c(1,3))
+plot(parties$year, parties$enp_lt, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Laakso and Taagepera (1979)")
+plot(parties$year, parties$enp_mol, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Molinar (1991)")
+plot(parties$year, parties$enp_gol, pch = 16,
+     xlab = "Year",
+     ylab = "ENP by Golosov (2010)")
+mtext("Scatter plots for Effective Number of Parties", side = 3, line = -2, outer = TRUE)
+```
+
+```{r scatter}
+# Here is scatter plot with regular ggplot
+d %>% 
+  ggplot() + 
+  aes(x = year, y = ENP, color = ENPsource) + 
+  geom_point(alpha = .2) +
+  geom_smooth(method = "lm") + 
+  labs(x = "Effective Number of Parties")
+```
+
+```{r average-enp}
+# Here is scatter plot with regular ggplot
+d %>% 
+  group_by(year, ENPsource) %>% # by piping in d, rather than using ggplot(d), we can modify the data before plotting without creating a new object. Here, we get the mean ENP: 
+  summarise(Mean = mean(ENP)) %>% 
+  ggplot() + 
+  aes(x = year, y = Mean, color = ENPsource) +
+  geom_line() +
+  labs(x = "Effective Number of Parties")
+```
+
+
+```{r, echo = T, results = 'hide'}
+par(mfrow=c(1,3))
+boxplot(parties$enp_lt, ylab = "ENP by Laakso and Taagepera (1979)")
+boxplot(parties$enp_mol, ylab = "ENP by Molinar (1991)")
+boxplot(parties$enp_mol, ylab = "ENP by Golosov (2010)")
+mtext("Box plots for Effective number of parties", side = 3, line = -2, outer = TRUE)
+```
+
+
 
